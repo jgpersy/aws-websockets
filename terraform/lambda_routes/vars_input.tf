@@ -49,6 +49,6 @@ variable "python_runtime" {
 }
 
 variable "authorizer_id" {
-    description = "The arn of the authorizer resource"
+    description = "The id of the authorizer resource"
     type        = string
 }
