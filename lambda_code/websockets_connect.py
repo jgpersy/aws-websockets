@@ -3,6 +3,8 @@ from os import environ
 
 
 def handler(event, context):
+    print(event)
+    print(context)
     dynamodb = boto3.resource('dynamodb')
 
     table = dynamodb.Table(environ.get("DYNAMODB_TABLE_NAME", ""))

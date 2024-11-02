@@ -32,6 +32,13 @@ locals {
   }
 }
 
+module "lambda_authorizer" {
+  source               = "./lambda_authorizer"
+  lambda_name          = "websockets_authorizer"
+  python_runtime       = var.python_runtime
+  api_gw_execution_arn = aws_apigatewayv2_api.websockets_api.execution_arn
+}
+
 module "lambda_routes" {
   source               = "./lambda_routes"
   for_each             = local.lambdas
@@ -45,11 +52,6 @@ module "lambda_routes" {
   dynamo_db_table_name = aws_dynamodb_table.api_gw_connection_ids.name
   dynamo_db_table_pkey = aws_dynamodb_table.api_gw_connection_ids.hash_key
   api_gw_stage_name    = var.api_gw_stage_name
+  authorizer_id        = aws_apigatewayv2_authorizer.authorizer.id
 }
 
-# module "lambda_authorizer" {
-#   source               = "./lambda_authorizer"
-#   lambda_name          = "websockets_authorizer"
-#   python_runtime       = var.python_runtime
-#   api_gw_execution_arn = aws_apigatewayv2_api.websockets_api.execution_arn
-# }

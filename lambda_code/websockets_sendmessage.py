@@ -14,7 +14,8 @@ def handler(event, context):
     table = dynamodb.Table(environ.get("DYNAMODB_TABLE_NAME", ""))
     pk = environ.get("DYNAMODB_TABLE_PKEY", "")
 
-    api_gw_mmgmt_api = boto3.client("apigatewaymanagementapi", endpoint_url=f"https://{api_id}.execute-api.{region}.amazonaws.com/{stage_name}")
+    api_gw_mmgmt_api = boto3.client("apigatewaymanagementapi",
+                                    endpoint_url=f"https://{api_id}.execute-api.{region}.amazonaws.com/{stage_name}")
 
     event_body = loads(event["body"])
     topic = event_body["topic"]
@@ -31,8 +32,8 @@ def handler(event, context):
             print(f"Sending message {message} to {item[f'{pk}']}")
             try:
                 api_gw_mmgmt_api.post_to_connection(
-                ConnectionId=item[f'{pk}'],
-                Data=f"{message}"
+                    ConnectionId=item[f'{pk}'],
+                    Data=f"{message}"
                 )
             except Exception as e:
                 print(f"Error: {e}")
