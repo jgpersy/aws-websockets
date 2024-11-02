@@ -4,7 +4,6 @@ from json import loads
 
 
 def handler(event, context):
-
     dynamodb = boto3.resource('dynamodb')
 
     table = dynamodb.Table(environ.get("DYNAMODB_TABLE_NAME", ""))

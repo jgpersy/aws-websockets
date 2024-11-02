@@ -1,7 +1,7 @@
 from json import loads, dumps
 
-def handler(event, context):
 
+def handler(event, context):
     headers = event['headers']
     if 'x-api-key' in headers:
         if headers['x-api-key'] == '1234':
@@ -19,9 +19,9 @@ def handler(event, context):
         response = generate_allow('me', '*')
     else:
         response = {
-        'statusCode': 401,
-        'body': dumps({'message': 'Unauthorized, incorrect query string value'})
-    }
+            'statusCode': 401,
+            'body': dumps({'message': 'Unauthorized, incorrect query string value'})
+        }
     return loads(response)
 
 
