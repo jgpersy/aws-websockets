@@ -6,8 +6,9 @@ Your websocket client can connect, subscribe to a topic and receive messages sen
 ## Installation
 
 1. Clone the repository
-2. Run `terraform init`
-3. Run `terraform apply`
+2. Navigate to the `/terraform` directory
+3. Run `terraform init`
+4. Run `terraform apply`
 
 ## Usage
 
