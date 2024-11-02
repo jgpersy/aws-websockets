@@ -61,6 +61,8 @@ resource "aws_apigatewayv2_route" "route" {
   route_key      = var.route_key
   operation_name = var.operation_name
   target         = "integrations/${aws_apigatewayv2_integration.integration.id}"
+  authorization_type = var.operation_name == "connect" ? "CUSTOM" : "NONE"
+  authorizer_id = var.authorizer_id
 }
 
 resource "aws_lambda_permission" "allow_api_gateway_to_invoke_lambdas" {

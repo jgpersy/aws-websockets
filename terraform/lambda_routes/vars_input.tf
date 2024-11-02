@@ -47,3 +47,8 @@ variable "python_runtime" {
   description = "Python runtime version"
   type = string
 }
+
+variable "authorizer_id" {
+    description = "The arn of the lambda authorizer"
+    type        = string
+}
