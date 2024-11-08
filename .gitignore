@@ -30,3 +30,5 @@ terraform.rc
 
 *.idea
 *.zip
+
+*.tfvars
