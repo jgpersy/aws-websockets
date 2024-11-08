@@ -11,9 +11,14 @@ resource "aws_lambda_function" "lambda" {
   filename         = "../lambda_code/${var.lambda_name}.zip"
   runtime          = var.python_runtime
   handler          = "${var.lambda_name}.handler"
-  depends_on       = [data.archive_file.lambda_zip]
+  depends_on       = [data.archive_file.lambda_zip, aws_security_group.lambda_route_sg]
   source_code_hash = filebase64sha256(data.archive_file.lambda_zip.output_path)
   timeout          = 10
+
+  vpc_config {
+    security_group_ids = [aws_security_group.lambda_route_sg.id]
+    subnet_ids = var.subnet_ids
+  }
 
   environment {
     variables = {
@@ -110,7 +115,50 @@ resource "aws_iam_policy" "dynamo_db_policy" {
         ]
         Effect   = "Allow"
         Resource = "${var.api_gw_execution_arn}/*"
+      },
+      {
+        Action = [
+            "elasticache:DescribeServerlessCaches",
+            "elasticache:DescribeCacheClusters",
+            "elasticache:ModifyServerlessCache",
+            "elasticache:ModifyCacheCluster"
+        ]
+        Effect   = "Allow"
+        Resource = var.elasticache_arn
       }
     ]
   })
+}
+
+resource "aws_security_group" "lambda_route_sg" {
+  name        = "lambda-route-${var.lambda_name}-sg"
+  description = "${var.lambda_name} security group"
+  vpc_id      = var.vpc_id
+}
+
+resource "aws_iam_policy" "ec2_network_policy" {
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "ec2:CreateNetworkInterface",
+        "ec2:DescribeNetworkInterfaces",
+        "ec2:DeleteNetworkInterface",
+        "ec2:AssignPrivateIpAddresses",
+        "ec2:UnassignPrivateIpAddresses"
+      ],
+      "Resource": [
+        "*"
+      ],
+      "Effect": "Allow"
+    }
+  ]
+}
+EOF
+}
+resource "aws_iam_role_policy_attachment" "ec2_network_access" {
+  role       = aws_iam_role.iam_for_lambda.name
+  policy_arn = aws_iam_policy.ec2_network_policy.arn
 }

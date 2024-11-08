@@ -9,3 +9,15 @@ variable "python_runtime" {
   type        = string
   default     = "python3.12"
 }
+
+variable "subnet_ids" {
+  type = list(string)
+  default = []
+  description = "The subnet ids for elasticache"
+}
+
+variable "vpc_id" {
+    type = string
+    default = ""
+    description = "The vpc id"
+}

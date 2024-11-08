@@ -52,3 +52,20 @@ variable "authorizer_id" {
     description = "The id of the authorizer resource"
     type        = string
 }
+
+variable "vpc_id" {
+    type = string
+    default = ""
+    description = "The vpc to place lambda function in"
+}
+
+variable "subnet_ids" {
+    type = list(string)
+    default = []
+    description = "The subnet ids to place lambda function in"
+}
+
+variable "elasticache_arn" {
+    type = string
+    description = "The arn of the elasticache"
+}
