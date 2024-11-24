@@ -28,6 +28,11 @@ locals {
       operation_name : "subscribe"
       route_key : "subscribe",
       lambda_name : "websockets_subscribe"
+    },
+    "ping" : {
+      operation_name : "ping"
+      route_key : "ping",
+      lambda_name : "websockets_ping"
     }
   }
 }
