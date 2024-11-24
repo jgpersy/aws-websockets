@@ -3,6 +3,8 @@ from os import environ
 from json import loads
 import redis
 
+cache = None
+
 TOPIC_PREFIX = "websocket-topic-"
 
 def handler(event, context):
@@ -11,7 +13,10 @@ def handler(event, context):
     message = event_body['message']
 
     elasticache_endpoint = environ["ELASTICACHE_ENDPOINT"]
-    cache = redis.Redis(host=elasticache_endpoint, port=6379, decode_responses=True, ssl=True)
+
+    global cache
+    if cache is None:
+        cache = redis.Redis(host=elasticache_endpoint, port=6379, decode_responses=True, ssl=True)
 
     connection_ids = cache.lrange("websocket-topic-" + topic, 0, -1)
 

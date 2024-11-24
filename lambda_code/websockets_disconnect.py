@@ -2,11 +2,16 @@ from os import environ
 
 import redis
 
+cache = None
+
 TOPIC_PREFIX = "websocket-topic-"
 
 def handler(event, context):
     elasticache_endpoint = environ["ELASTICACHE_ENDPOINT"]
-    cache = redis.Redis(host=elasticache_endpoint, port=6379, decode_responses=True, ssl=True)
+
+    global cache
+    if cache is None:
+        cache = redis.Redis(host=elasticache_endpoint, port=6379, decode_responses=True, ssl=True)
 
     topics = []
     cursor = '0'
