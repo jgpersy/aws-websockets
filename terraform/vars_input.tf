@@ -7,5 +7,17 @@ variable "api_gw_stage_name" {
 variable "python_runtime" {
   description = "The python runtime version"
   type        = string
-  default     = "python3.12"
+  default     = "python3.10"
+}
+
+variable "subnet_ids" {
+  type = list(string)
+  default = []
+  description = "The subnet ids for elasticache"
+}
+
+variable "vpc_id" {
+    type = string
+    default = ""
+    description = "The vpc id"
 }

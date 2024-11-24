@@ -1,18 +1,22 @@
-import boto3
 from os import environ
 
+import redis
+
+TOPIC_PREFIX = "websocket-topic-"
 
 def handler(event, context):
-    dynamodb = boto3.resource('dynamodb')
+    elasticache_endpoint = environ["ELASTICACHE_ENDPOINT"]
+    cache = redis.Redis(host=elasticache_endpoint, port=6379, decode_responses=True, ssl=True)
 
-    table = dynamodb.Table(environ.get("DYNAMODB_TABLE_NAME", ""))
-    pk = environ.get("DYNAMODB_TABLE_PKEY", "")
+    topics = []
+    cursor = '0'
+    while cursor != 0:
+        cursor, new_topics = cache.scan(cursor, match=TOPIC_PREFIX + "*")
+        topics.extend(new_topics)
 
-    table.delete_item(
-        Key={
-            f'{pk}': f'{event["requestContext"]["connectionId"]}',
-        }
-    )
+    for topic in topics:
+        cache.lrem(topic, 0, event["requestContext"]["connectionId"])
+
     return {
         'statusCode': 200,
         'body': 'Connected'

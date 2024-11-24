@@ -23,21 +23,6 @@ variable "operation_name" {
   type        = string
 }
 
-variable "dynamo_db_table_arn" {
-  description = "The arn of the dynamo db table"
-  type        = string
-}
-
-variable "dynamo_db_table_name" {
-  description = "The name of the dynamo db table"
-  type        = string
-}
-
-variable "dynamo_db_table_pkey" {
-  description = "The primary key of the dynamo db table"
-  type        = string
-}
-
 variable "api_gw_stage_name" {
   description = "The name of the API Gateway stage"
   type        = string
@@ -51,4 +36,21 @@ variable "python_runtime" {
 variable "authorizer_id" {
     description = "The id of the authorizer resource"
     type        = string
+}
+
+variable "vpc_id" {
+    type = string
+    default = ""
+    description = "The vpc to place lambda function in"
+}
+
+variable "subnet_ids" {
+    type = list(string)
+    default = []
+    description = "The subnet ids to place lambda function in"
+}
+
+variable "elasticache_endpoint" {
+    type = string
+    description = "The endpoint of the elasticache"
 }
