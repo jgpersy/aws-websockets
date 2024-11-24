@@ -1,38 +1,32 @@
 import boto3
 from os import environ
 from json import loads
+import redis
 
-from boto3.dynamodb.conditions import Attr
-
+TOPIC_PREFIX = "websocket-topic-"
 
 def handler(event, context):
-    dynamodb = boto3.resource('dynamodb')
+    event_body = loads(event["body"])
+    topic = event_body["topic"]
+    message = event_body['message']
+
+    elasticache_endpoint = environ["ELASTICACHE_ENDPOINT"]
+    cache = redis.Redis(host=elasticache_endpoint, port=6379, decode_responses=True, ssl=True)
+
+    connection_ids = cache.lrange("websocket-topic-" + topic, 0, -1)
 
     stage_name = environ.get("API_GW_STAGE_NAME", "")
     api_id = environ.get("API_GW_ID", "")
     region = environ.get("AWS_REGION", "eu-west-1")
-    table = dynamodb.Table(environ.get("DYNAMODB_TABLE_NAME", ""))
-    pk = environ.get("DYNAMODB_TABLE_PKEY", "")
 
     api_gw_mmgmt_api = boto3.client("apigatewaymanagementapi",
                                     endpoint_url=f"https://{api_id}.execute-api.{region}.amazonaws.com/{stage_name}")
 
-    event_body = loads(event["body"])
-    topic = event_body["topic"]
-
-    results = table.scan(
-        FilterExpression=Attr('Topic').eq(f'{topic}'),
-    )
-
-    connection_id = event["requestContext"]["connectionId"]
-    message = event_body['message']
-
-    for item in results['Items']:
-        if item[f'{pk}'] != connection_id:
-            print(f"Sending message {message} to {item[f'{pk}']}")
+    for connection_id in connection_ids:
+        if event["requestContext"]["connectionId"] != connection_id:
             try:
                 api_gw_mmgmt_api.post_to_connection(
-                    ConnectionId=item[f'{pk}'],
+                    ConnectionId=connection_id,
                     Data=f"{message}"
                 )
             except Exception as e:

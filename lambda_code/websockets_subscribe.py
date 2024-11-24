@@ -1,21 +1,16 @@
 import boto3
 from os import environ
 from json import loads
+import redis
 
+TOPIC_PREFIX = "websocket-topic-"
 
 def handler(event, context):
-    dynamodb = boto3.resource('dynamodb')
 
-    table = dynamodb.Table(environ.get("DYNAMODB_TABLE_NAME", ""))
-    pk = environ.get("DYNAMODB_TABLE_PKEY", "")
+    elasticache_endpoint = environ["ELASTICACHE_ENDPOINT"]
+    cache = redis.Redis(host=elasticache_endpoint, port=6379, decode_responses=True, ssl=True)
 
-    table.put_item(
-        Item={
-            f'{pk}': f'{event["requestContext"]["connectionId"]}',
-            'Topic': f'{loads(event["body"])["topic"]}'
-        }
-    )
-
+    cache.lpush(TOPIC_PREFIX + loads(event["body"])["topic"], event["requestContext"]["connectionId"])
     return {
         'statusCode': 200,
         'body': 'Connected'

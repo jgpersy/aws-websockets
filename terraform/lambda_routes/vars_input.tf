@@ -23,21 +23,6 @@ variable "operation_name" {
   type        = string
 }
 
-variable "dynamo_db_table_arn" {
-  description = "The arn of the dynamo db table"
-  type        = string
-}
-
-variable "dynamo_db_table_name" {
-  description = "The name of the dynamo db table"
-  type        = string
-}
-
-variable "dynamo_db_table_pkey" {
-  description = "The primary key of the dynamo db table"
-  type        = string
-}
-
 variable "api_gw_stage_name" {
   description = "The name of the API Gateway stage"
   type        = string
@@ -65,7 +50,7 @@ variable "subnet_ids" {
     description = "The subnet ids to place lambda function in"
 }
 
-variable "elasticache_arn" {
+variable "elasticache_endpoint" {
     type = string
-    description = "The arn of the elasticache"
+    description = "The endpoint of the elasticache"
 }

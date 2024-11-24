@@ -14,6 +14,7 @@ resource "aws_lambda_function" "lambda" {
   depends_on       = [data.archive_file.lambda_zip, aws_security_group.lambda_route_sg]
   source_code_hash = filebase64sha256(data.archive_file.lambda_zip.output_path)
   timeout          = 10
+  layers = [aws_lambda_layer_version.redis_layer.arn]
 
   vpc_config {
     security_group_ids = [aws_security_group.lambda_route_sg.id]
@@ -22,35 +23,18 @@ resource "aws_lambda_function" "lambda" {
 
   environment {
     variables = {
-      DYNAMODB_TABLE_NAME = var.dynamo_db_table_name
-      DYNAMODB_TABLE_PKEY = var.dynamo_db_table_pkey
       API_GW_ID           = var.api_gw_id
       API_GW_STAGE_NAME   = var.api_gw_stage_name
+      ELASTICACHE_ENDPOINT = var.elasticache_endpoint
     }
   }
 }
 
-resource "aws_iam_role" "iam_for_lambda" {
-  name               = "iam_for_lambda_${var.lambda_name}"
-  assume_role_policy = data.aws_iam_policy_document.assume_role.json
-}
+resource "aws_lambda_layer_version" "redis_layer" {
+  filename   = "../lambda_code/redis_layer.zip"
+  layer_name = "redis_layer"
 
-data "aws_iam_policy_document" "assume_role" {
-  statement {
-    effect = "Allow"
-
-    principals {
-      type        = "Service"
-      identifiers = ["lambda.amazonaws.com"]
-    }
-
-    actions = ["sts:AssumeRole"]
-  }
-}
-
-resource "aws_iam_role_policy_attachment" "lambda_policy_attachment" {
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-  role       = aws_iam_role.iam_for_lambda.name
+  compatible_runtimes = ["python3.10"]
 }
 
 resource "aws_apigatewayv2_integration" "integration" {
@@ -70,95 +54,3 @@ resource "aws_apigatewayv2_route" "route" {
   authorizer_id = var.authorizer_id
 }
 
-resource "aws_lambda_permission" "allow_api_gateway_to_invoke_lambdas" {
-  statement_id  = "AllowExecutionFromApiGateway"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.lambda.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "${var.api_gw_execution_arn}/*"
-}
-
-resource "aws_iam_role_policy_attachment" "lambda_policy_attachment_dynamo_db" {
-  policy_arn = aws_iam_policy.dynamo_db_policy.arn
-  role       = aws_iam_role.iam_for_lambda.name
-}
-
-resource "aws_iam_policy" "dynamo_db_policy" {
-  name        = "websockets_lamda_policy_${var.lambda_name}"
-  path        = "/"
-  description = ""
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = [
-          "dynamodb:BatchWriteItem",
-          "dynamodb:PutItem",
-          "dynamodb:UpdateItem",
-          "dynamodb:DeleteItem",
-          "dynamodb:DescribeTable",
-          "dynamodb:Scan",
-          "dynamodb:Query",
-          "dynamodb:GetItem",
-          "dynamodb:ConditionCheckItem",
-          "dynamodb:BatchGetItem",
-          "dynamodb:GetRecords",
-          "dynamodb:GetShardIterator",
-        ]
-        Effect   = "Allow"
-        Resource = var.dynamo_db_table_arn
-      },
-      {
-        Action = [
-          "execute-api:ManageConnections"
-        ]
-        Effect   = "Allow"
-        Resource = "${var.api_gw_execution_arn}/*"
-      },
-      {
-        Action = [
-            "elasticache:DescribeServerlessCaches",
-            "elasticache:DescribeCacheClusters",
-            "elasticache:ModifyServerlessCache",
-            "elasticache:ModifyCacheCluster"
-        ]
-        Effect   = "Allow"
-        Resource = var.elasticache_arn
-      }
-    ]
-  })
-}
-
-resource "aws_security_group" "lambda_route_sg" {
-  name        = "lambda-route-${var.lambda_name}-sg"
-  description = "${var.lambda_name} security group"
-  vpc_id      = var.vpc_id
-}
-
-resource "aws_iam_policy" "ec2_network_policy" {
-  policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Action": [
-        "ec2:CreateNetworkInterface",
-        "ec2:DescribeNetworkInterfaces",
-        "ec2:DeleteNetworkInterface",
-        "ec2:AssignPrivateIpAddresses",
-        "ec2:UnassignPrivateIpAddresses"
-      ],
-      "Resource": [
-        "*"
-      ],
-      "Effect": "Allow"
-    }
-  ]
-}
-EOF
-}
-resource "aws_iam_role_policy_attachment" "ec2_network_access" {
-  role       = aws_iam_role.iam_for_lambda.name
-  policy_arn = aws_iam_policy.ec2_network_policy.arn
-}
