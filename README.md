@@ -21,5 +21,5 @@ Once connected, press enter and the default response will give instructions on u
 TODO
 - [x] Authorization: query string
 - [x] Authorization: x-api-key header
-- [ ] Storage: change dynamoDB to cache e.g. elastic cache
+- [x] Storage: change dynamoDB to cache e.g. elastic cache
 - [ ] PING/PONG request/response to prevent client connection timeout
