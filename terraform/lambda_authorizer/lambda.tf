@@ -6,7 +6,7 @@ data "archive_file" "lambda_zip" {
 }
 
 resource "aws_lambda_function" "lambda_authorizer" {
-  function_name    = "${var.lambda_name}-${var.env}"
+  function_name    = "${var.lambda_name}_${var.env}"
   role             = aws_iam_role.iam_for_lambda.arn
   filename         = "../lambda_code/${var.lambda_name}.zip"
   runtime          = var.python_runtime
@@ -17,7 +17,9 @@ resource "aws_lambda_function" "lambda_authorizer" {
 
   environment {
     variables = {
-      LOG_LEVEL = var.config_log_level
+      LOG_LEVEL           = var.config_log_level
+      QUERY_STRING_SECRET = var.query_string_secret
+      API_KEY_SECRET      = var.api_key_secret
     }
   }
 }
