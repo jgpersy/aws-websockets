@@ -1,10 +1,13 @@
-from os import environ
 from json import dumps
 from datetime import datetime
 import boto3
+from lambda_logging import log_config
+from os import environ
 
+logger = log_config('websockets_default', environ['LOG_LEVEL'])
 
 def handler(event, context):
+
     stage_name = environ.get("API_GW_STAGE_NAME", "")
     api_id = environ.get("API_GW_ID", "")
     region = environ.get("AWS_REGION", "eu-west-1")
@@ -18,6 +21,8 @@ def handler(event, context):
     for key in connection_info:
         if isinstance(connection_info[key], datetime):
             connection_info[key] = connection_info[key].isoformat()
+
+    logger.debug(f"Posting default response to connection id: {connection_id}, \n{dumps(connection_info)}")
 
     try:
         api_gw_mmgmt_api.post_to_connection(

@@ -34,3 +34,5 @@ venv
 *.zip
 
 *.tfvars
+!example.tfvars
+*.DS_Store

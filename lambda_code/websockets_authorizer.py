@@ -1,12 +1,19 @@
 from json import loads, dumps
+from os import environ
+from lambda_logging import log_config
+
+logger = log_config('websockets_authorizer', environ['LOG_LEVEL'])
 
 
 def handler(event, context):
+
     headers = event['headers']
     if 'x-api-key' in headers:
         if headers['x-api-key'] == '1234':
+            logger.debug('Authorized on api key')
             response = generate_allow('me', '*')
         else:
+            logger.error('Unauthorized, incorrect api key')
             response = {
                 'statusCode': 401,
                 'body': dumps({'message': 'Unauthorized, incorrect api key'})
@@ -16,8 +23,10 @@ def handler(event, context):
     queryStringParameters = event['queryStringParameters']
 
     if queryStringParameters["QueryString1"] == "queryValue1":
+        logger.debug('Authorized on query string value')
         response = generate_allow('me', '*')
     else:
+        logger.error('Unauthorized, incorrect query string value')
         response = {
             'statusCode': 401,
             'body': dumps({'message': 'Unauthorized, incorrect query string value'})
