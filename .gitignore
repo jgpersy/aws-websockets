@@ -35,3 +35,4 @@ venv
 
 *.tfvars
 !example.tfvars
+*.DS_Store
