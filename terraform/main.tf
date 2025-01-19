@@ -42,6 +42,8 @@ module "lambda_authorizer" {
   lambda_name          = "websockets_authorizer"
   python_runtime       = var.python_runtime
   api_gw_execution_arn = aws_apigatewayv2_api.websockets_api.execution_arn
+  config_log_level     = var.log_level
+  env                  = terraform.workspace
 }
 
 module "lambda_routes" {
@@ -58,5 +60,7 @@ module "lambda_routes" {
   vpc_id               = var.vpc_id
   subnet_ids           = var.subnet_ids
   elasticache_endpoint = aws_elasticache_serverless_cache.redis.endpoint[0]["address"]
+  config_log_level     = var.log_level
+  env                  = terraform.workspace
 }
 

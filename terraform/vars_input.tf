@@ -1,7 +1,7 @@
 variable "api_gw_stage_name" {
   description = "The name of the API Gateway stage"
   type        = string
-  default     = "sandbox"
+  default     = "websockets-stage"
 }
 
 variable "python_runtime" {
@@ -11,13 +11,19 @@ variable "python_runtime" {
 }
 
 variable "subnet_ids" {
-  type = list(string)
-  default = []
+  type        = list(string)
+  default     = []
   description = "The subnet ids for elasticache"
 }
 
 variable "vpc_id" {
-    type = string
-    default = ""
-    description = "The vpc id"
+  type        = string
+  default     = ""
+  description = "The vpc id"
+}
+
+variable "log_level" {
+  description = "The log level for the lambda"
+  type        = string
+  default     = "DEBUG"
 }

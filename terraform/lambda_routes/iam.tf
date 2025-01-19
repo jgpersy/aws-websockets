@@ -29,7 +29,7 @@ resource "aws_lambda_permission" "allow_api_gateway_to_invoke_lambdas" {
   source_arn    = "${var.api_gw_execution_arn}/*"
 }
 resource "aws_iam_policy" "ec2_network_policy" {
-  name = "${var.lambda_name}_lambda_ec2_network_policy"
+  name   = "${var.lambda_name}_lambda_ec2_network_policy"
   policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -58,7 +58,7 @@ resource "aws_iam_role_policy_attachment" "ec2_network_access" {
 }
 
 resource "aws_iam_policy" "lambda_api_gw_policy" {
-  name        = "${var.lambda_name}_lambda_api_gw_policy"
+  name = "${var.lambda_name}_lambda_api_gw_policy"
 
   policy = jsonencode({
     Version = "2012-10-17"

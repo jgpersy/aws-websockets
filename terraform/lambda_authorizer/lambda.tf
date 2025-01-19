@@ -1,11 +1,12 @@
 data "archive_file" "lambda_zip" {
   type        = "zip"
-  source_file = "../lambda_code/${var.lambda_name}.py"
+  source_dir  = "../lambda_code/"
   output_path = "../lambda_code/${var.lambda_name}.zip"
+  excludes    = setsubtract(fileset("../lambda_code/", "*"), ["${var.lambda_name}.py", "lambda_logging.py"])
 }
 
 resource "aws_lambda_function" "lambda_authorizer" {
-  function_name    = var.lambda_name
+  function_name    = "${var.lambda_name}-${var.env}"
   role             = aws_iam_role.iam_for_lambda.arn
   filename         = "../lambda_code/${var.lambda_name}.zip"
   runtime          = var.python_runtime
@@ -16,7 +17,7 @@ resource "aws_lambda_function" "lambda_authorizer" {
 
   environment {
     variables = {
-
+      LOG_LEVEL = var.config_log_level
     }
   }
 }
