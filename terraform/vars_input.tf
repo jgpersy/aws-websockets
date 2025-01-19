@@ -27,3 +27,6 @@ variable "log_level" {
   type        = string
   default     = "DEBUG"
 }
+
+variable "query_string_secret" {}
+variable "api_key_secret" {}

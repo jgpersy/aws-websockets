@@ -44,6 +44,8 @@ module "lambda_authorizer" {
   api_gw_execution_arn = aws_apigatewayv2_api.websockets_api.execution_arn
   config_log_level     = var.log_level
   env                  = terraform.workspace
+  api_key_secret       = var.api_key_secret
+  query_string_secret  = var.query_string_secret
 }
 
 module "lambda_routes" {

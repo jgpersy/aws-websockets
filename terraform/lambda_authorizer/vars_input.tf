@@ -23,3 +23,6 @@ variable "env" {
   description = "The environment the project is in"
   type        = string
 }
+
+variable "query_string_secret" {}
+variable "api_key_secret" {}

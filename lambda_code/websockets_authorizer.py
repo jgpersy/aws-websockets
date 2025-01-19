@@ -3,13 +3,14 @@ from os import environ
 from lambda_logging import log_config
 
 logger = log_config('websockets_authorizer', environ['LOG_LEVEL'])
-
+QUERY_STRING_SECRET = environ['QUERY_STRING_SECRET']
+API_KEY_SECRET = environ['API_KEY_SECRET']
 
 def handler(event, context):
 
     headers = event['headers']
     if 'x-api-key' in headers:
-        if headers['x-api-key'] == '1234':
+        if headers['x-api-key'] == API_KEY_SECRET:
             logger.debug('Authorized on api key')
             response = generate_allow('me', '*')
         else:
@@ -22,7 +23,7 @@ def handler(event, context):
 
     queryStringParameters = event['queryStringParameters']
 
-    if queryStringParameters["QueryString1"] == "queryValue1":
+    if queryStringParameters["QueryString1"] == QUERY_STRING_SECRET:
         logger.debug('Authorized on query string value')
         response = generate_allow('me', '*')
     else:
